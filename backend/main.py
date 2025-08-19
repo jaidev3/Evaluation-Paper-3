@@ -1,14 +1,30 @@
 
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, PositiveInt
-from typing import List
+from typing import List, Annotated
 from datetime import date
-from sqlalchemy import create_engine
+# from sqlalchemy import create_engine
 from sqlalchemy.orm import  sessionmaker
+from fastapi import Depends, FastAPI, HTTPException, Query
+from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 
-db = create_engine("sqlite:///smartfit.db", echo=True)
+# db = create_engine("sqlite:///smartfit.db", echo=True)
+
+sqlite_file_name = "database.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+
+connect_args = {"check_same_thread": False}
+engine = create_engine(sqlite_url, connect_args=connect_args)
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+SessionDep = Annotated[Session, Depends(get_session)]
 
 origins = [
     "http://localhost",
@@ -19,15 +35,15 @@ origins = [
 
 
 # Schemas
-class User(BaseModel):
+class User(SQLModel):
     id: int
     username: str
     email: EmailStr
     password: str
-    age: PositiveInt
-    weight: PositiveInt
-    height: PositiveInt
-    goal: List[str]
+    # age: PositiveInt
+    # weight: PositiveInt
+    # height: PositiveInt
+    # goal: List[str]
 
 class Workout(BaseModel):
     id: int
@@ -76,14 +92,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
 # Authentication 
 @app.get("/health")
 async def root():
     return {"message": "OK"}
 
 @app.post("/auth/register")
-async def register():
-    return {"message": "Register"}
+async def register(user: User, session: SessionDep):
+    session.add(user)
+    # session.commit()
+    # session.refresh(user)
+    # return user
+    return {"message": user}
 
 @app.post("/auth/login")
 async def login():

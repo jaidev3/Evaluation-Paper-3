@@ -4,6 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, PositiveInt
 from typing import List
 from datetime import date
+from sqlalchemy import create_engine
+from sqlalchemy.orm import  sessionmaker
+
+
+db = create_engine("sqlite:///smartfit.db", echo=True)
 
 origins = [
     "http://localhost",

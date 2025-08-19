@@ -13,10 +13,6 @@ origins = [
 ]
 
 
-# Users: id, username, email, password, age, weight, height, goals
-# Workouts: id, user_id, plan_name, date, exercises, duration
-# Nutrition: id, user_id, date, meals, calories, macros
-# Progress: id, user_id, workout_id, sets, reps, weights, notes
 # Schemas
 class User(BaseModel):
     id: int
@@ -36,8 +32,32 @@ class Workout(BaseModel):
     expercises: List[str]
     duration: int
 
-# class Nut 
+class Nutrition(BaseModel):
+    id: int
+    user_id: int
+    date: date
+    meals: List[str]
+    calories: int
+    macros: int
 
+class Progress(BaseModel):
+    id: int
+    user_id: int 
+    workout_id: int
+    sets: int
+    reps: int
+    weights: int
+    notes: str
+
+class Exercise(BaseModel):
+    id: int
+    user_id: int
+    exercise_name: str
+    category: str
+    equipment_needed: List[str]
+    difficulty: str
+    instructions: List[str]
+    target_muscles: str
 
 
 # import uvicorn
@@ -51,24 +71,52 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
-
+# Authentication 
 @app.get("/health")
 async def root():
     return {"message": "OK"}
 
-@app.post("/register")
+@app.post("/auth/register")
 async def register():
     return {"message": "Register"}
 
-@app.post("/login")
+@app.post("/auth/login")
 async def login():
     return {"message": "Login"}
 
-@app.get("/profile")
+@app.get("auth/user/{user_id}")
 async def profile():
     return {"message": "Profile"}
+
+
+# Core CRUD
+# GET/POST/PUT/DELETE /workouts - Workout management
+# GET/POST/PUT/DELETE /exercises - Exercise database
+# GET/POST/PUT/DELETE /nutrition - Nutrition logging
+# GET/POST/PUT/DELETE /progress - Progress tracking
+# AI Chat
+# POST /chat/ask - Send question, get RAG-powered response
+# GET /chat/history/{user_id} - Get chat history
+
+@app.post("/workout")
+def add_workout():
+    return {"message": "workout added"}
+
+@app.get("/workout")
+def get_all_workout():
+    return {"message": "All workout"}
+
+@app.get("/workout/{workout_id}")
+def get_workout():
+    return {"message": "workout get"}
+
+@app.put("/workout/{workout_id}")
+def put_workout():
+    return {"message": "workout edited"}
+
+@app.delete("/workout/{workout_id}")
+def delete_workout():
+    return {"message": "workout deleted"}
 
 
 

@@ -1,3 +1,5 @@
 fastapi[standard]
 uvicorn
 sqlalchemy
+langchain[google-genai]
+python-dotenv
